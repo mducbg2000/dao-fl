@@ -1,0 +1,154 @@
+archetype federated_dao with metadata ""
+
+///////////////////////////////////////
+// Data type
+///////////////////////////////////////
+
+enum vote_value =
+| Abstain
+| Reject
+| Accept
+
+enum status = 
+| Pending
+| Rejected
+| Accepted
+
+///////////////////////////////////////
+// Storage
+///////////////////////////////////////
+
+asset members identified by addr {
+    addr: address;
+    power: nat;
+}
+
+asset model identified by model_cid {
+    model_cid: string;
+    suggester: address;
+    part_cid: list<string> = [];
+}
+
+asset poll identified by p_id {
+    p_id: string;
+    creator: address;
+    model_id: string;
+    update_cid: option<string>;
+    ballots: partition<ballot> = [];
+}
+
+asset ballot {
+    voter: address;
+    weight: nat;
+    value: vote_value;
+}
+
+///////////////////////////////////////
+// Entry points
+///////////////////////////////////////
+
+entry suggest_new_model(model_cid_ : string) {
+
+    require {
+        only_member: members.contains(caller) otherwise "Only member can suggest new model"
+    }
+
+    fail if {
+        model_exist: model.contains(model_cid_) with "Model already exists"
+    } 
+
+    effect {
+        const new_poll_id = hash(caller, model_cid_, none);
+
+        poll.add({
+            p_id = new_poll_id;
+            creator= caller;
+            model_id = model_cid_;
+            update_cid = none
+        })
+    }
+}
+
+entry contribute_local_model(model_cid_ : string, update_cid_: string) {
+    require {
+        member_contribute: members.contains(caller) otherwise "Only member can contribute model";
+        model_exists: model.contains(model_cid_) otherwise "Model doesn't exist"
+    }
+
+    fail if {
+        update_exists: is_update_exist(update_cid_) with "Update already exists"
+    }
+
+    effect {
+        const new_poll_id = hash(caller, model_cid_, some(update_cid_));
+
+        poll.add({
+            p_id = new_poll_id;
+            creator= caller;
+            model_id = model_cid_;
+            update_cid = some(update_cid_)
+        })
+    }
+}
+
+entry vote(poll_id: string, value_: vote_value) {
+
+    require {
+        poll_exist: poll.contains(poll_id) otherwise "Poll doesn't exist"
+    }
+
+    effect {
+        const vote_power = members[caller].power;
+
+
+        poll[poll_id].ballots.add({
+            voter = caller;
+            weight = vote_power;
+            value = value_
+        })
+    }
+}
+
+entry join() {
+    require {
+        r2: transferred > 10utz 
+    }
+
+    effect {
+        members.add({caller; 0})
+    }
+}
+
+///////////////////////////////////////
+// Utils
+///////////////////////////////////////
+
+function is_update_exist(update_cid_: string) : bool {
+    const p = poll.select(the.update_cid = some(update_cid_));
+    return (p.count() > 0)
+}
+
+function hash(creator_: address, model_cid_: string, update_cid_: option<string>) : string {
+    const cm = concat(pack(creator_), pack(model_cid_));
+    const cmu = update_cid_ ? concat(cm, pack(the)) : cm;
+    const result ?= unpack<string>(keccak(cmu));
+    return result
+}
+
+function poll_value(poll_id_: string, value_: vote_value) : nat {
+    return poll[poll_id_].ballots.select(the.value = value_).sum(weight)
+}
+
+function total_power() : nat {
+    return members.sum(power)
+}
+
+function participation_of_poll(poll_id: string) : rational {
+    return (poll[poll_id].ballots.sum(weight) / total_power())
+}
+
+function accept_rate(poll_id: string) : rational {
+    const accept_power = poll[poll_id].ballots.select(the.value = Accept).sum(weight);
+    const reject_power = poll[poll_id].ballots.select(the.value = Reject).sum(weight);
+    return (accept_power / (accept_power + reject_power))
+}

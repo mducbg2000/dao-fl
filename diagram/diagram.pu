@@ -1,0 +1,45 @@
+@startuml architecture
+!theme materia-outline
+left to right direction
+label a [
+    <img:https://cdn-icons-png.flaticon.com/64/1865/1865273.png>
+       A client
+]
+
+label i [
+    <img:https://cdn-icons-png.flaticon.com/64/1468/1468160.png>
+         IPFS
+]
+
+label s [
+    <img:https://cdn-icons-png.flaticon.com/64/5901/5901994.png>
+        Smart 
+      Contract
+]
+
+label o [
+    <img:https://cdn-icons-png.flaticon.com/64/3598/3598209.png>
+       Others
+        Client
+]
+
+i -[dashed]-->> a : [1.1]<img:https://cdn-icons-png.flaticon.com/24/2313/2313448.png>
+a --->> i : [1.0]<img:https://cdn-icons-png.flaticon.com/24/1091/1091223.png>
+
+a --->> s : [2]<img:https://cdn-icons-png.flaticon.com/24/2313/2313448.png>
+
+s --->> o : [3]<img:https://cdn-icons-png.flaticon.com/24/2326/2326125.png>
+
+i -[dashed]-->> o: [4]<img:https://cdn-icons-png.flaticon.com/24/1091/1091007.png>
+
+o -[#DarkGoldenRod;dotted]-->> o : [5]<img:https://cdn-icons-png.flaticon.com/24/9732/9732828.png>
+
+s <<--[#Green]- o: [6]<img:https://cdn-icons-png.flaticon.com/24/3468/3468568.png>
+
+note as des1
+<img:https://cdn-icons-png.flaticon.com/24/1091/1091223.png>: Upload QoE model file
+<img:https://cdn-icons-png.flaticon.com/24/1091/1091007.png>: Download QoE model file
+<img:https://cdn-icons-png.flaticon.com/24/2313/2313448.png>: File's CID           <img:https://cdn-icons-png.flaticon.com/24/2326/2326125.png>: Emit event 
+<img:https://cdn-icons-png.flaticon.com/24/9732/9732828.png>: Evaluate model <img:https://cdn-icons-png.flaticon.com/24/3468/3468568.png>: Vote for model
+endnote
+@enduml
