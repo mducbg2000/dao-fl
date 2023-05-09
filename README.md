@@ -1,28 +1,26 @@
-# create-svelte
+# Build app
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
+Everything you need to build this Dapp
 
-## Creating a project
+## Required
 
-If you're seeing this, you've probably already done this step. Congrats!
+Install some [prerequisites](https://tauri.app/v1/guides/getting-started/prerequisites) and [NodeJS](https://github.com/nvm-sh/nvm) then do these steps:
 
 ```bash
-# create a new project in the current directory
-npm create svelte@latest
+# Install PNPM
+npm i -g pnpm
 
-# create a new project in my-app
-npm create svelte@latest my-app
+# Install dependencies
+pnpm i
+
 ```
 
 ## Developing
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+Once you've created a project and installed dependencies, start a development server:
 
 ```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+pnpm tauri dev
 ```
 
 ## Building
@@ -30,9 +28,9 @@ npm run dev -- --open
 To create a production version of your app:
 
 ```bash
-npm run build
+npm tauri build
 ```
-
+<!-- 
 You can preview the production build with `npm run preview`.
 
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment. -->
